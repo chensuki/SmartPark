@@ -35,11 +35,15 @@ export default defineConfig(({ mode }) => {
         iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
         symbolId: 'icon-[dir]-[name]',
       }),
-      // Mock 服务（dev 生效，build 可选）
+      // Mock 服务（dev 和 prod 都生效，Demo 项目无需后端）
       viteMockServe({
         mockPath: 'mock',
-        enable: mode === 'development',
-        logger: true,
+        enable: true,
+        // 生产环境也启用 mock（Demo 项目部署到 Vercel 时无需后端服务）
+        prodEnabled: true,
+        // 生产环境注入 mock 代码到入口
+        injectCode: 'import { setupProdMockServer } from "./mockProdServer"; setupProdMockServer();',
+        logger: mode === 'development',
       }),
     ],
     resolve: {
