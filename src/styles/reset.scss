@@ -1,0 +1,114 @@
+// =========================================================================
+// 全局 reset —— 轻量级现代化 reset
+// 注意：子模块需自行 @use variables（additionalData 只对入口文件生效）
+// =========================================================================
+@use './variables.scss' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: $font-sans;
+  font-size: $fs-md;
+  line-height: $lh-normal;
+  color: $color-ink;
+  background: $color-bg;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'tnum' on; // 数字等宽，对齐表格数据
+}
+
+// 链接
+a {
+  color: $color-accent;
+  text-decoration: none;
+  transition: color $dur-fast $ease;
+
+  &:hover {
+    color: $color-accent-ink;
+  }
+}
+
+// 列表
+ul,
+ol {
+  list-style: none;
+}
+
+// 图片/媒体
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+// 按钮/输入框基础重置
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+// 标题
+h1, h2, h3, h4, h5, h6 {
+  font-weight: $fw-semibold;
+  line-height: $lh-tight;
+}
+
+// 滚动条美化（暖白主题）
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $color-line-strong;
+  border-radius: $radius-full;
+
+  &:hover {
+    background: $color-ink-3;
+  }
+}
+
+// 选中文本
+::selection {
+  background: $color-accent-soft;
+  color: $color-accent-ink;
+}
+
+// 焦点可见性（无障碍）
+:focus-visible {
+  outline: 2px solid $color-accent;
+  outline-offset: 2px;
+}

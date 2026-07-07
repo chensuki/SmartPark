@@ -1,0 +1,86 @@
+// =========================================================================
+// SCSS mixins —— 复用样式逻辑
+// 注意：子模块需自行 @use variables（additionalData 只对入口文件生效）
+// =========================================================================
+@use './variables.scss' as *;
+
+// 文本省略
+
+// 文本省略
+@mixin text-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// flex 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 卡片样式
+@mixin card-base {
+  background: $color-surface;
+  border: 1px solid $color-line;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+}
+
+// 状态药丸（来自 live-dashboard）
+@mixin status-pill($bg, $ink) {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-1;
+  padding: 2px $sp-2;
+  border-radius: $radius-sm;
+  background: $bg;
+  color: $ink;
+  font-size: $fs-sm;
+  font-weight: $fw-medium;
+}
+
+// 大屏自适应缩放（监控大屏专用）
+@mixin screen-scale {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scale(var(--screen-scale, 1));
+  width: $screen-base-width + 0px;
+  height: $screen-base-height + 0px;
+}
+
+// 响应式断点
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'sm' {
+    @media (max-width: 640px) { @content; }
+  } @else if $breakpoint == 'md' {
+    @media (max-width: 980px) { @content; }
+  } @else if $breakpoint == 'lg' {
+    @media (max-width: 1280px) { @content; }
+  } @else if $breakpoint == 'xl' {
+    @media (max-width: 1536px) { @content; }
+  }
+}
+
+// 减弱动效（无障碍）
+@mixin reduce-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}

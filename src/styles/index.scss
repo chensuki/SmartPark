@@ -1,0 +1,134 @@
+// =========================================================================
+// 全局样式入口
+// variables / mixins 已由 vite.config.ts 的 additionalData 全局注入
+// =========================================================================
+
+@use './reset.scss';
+
+// =========================================================================
+// CSS 变量 —— 双主题切换的核心
+// 默认（:root）= 暖白主题；[data-theme='dark'] = 赛博暗黑
+// =========================================================================
+:root {
+  // 背景
+  --bg: #{$color-bg};
+  --bg-soft: #{$color-bg-soft};
+  --bg-hover: #{$color-bg-hover};
+  --surface: #{$color-surface};
+  --surface-2: #{$color-surface-2};
+
+  // 文字
+  --ink: #{$color-ink};
+  --ink-2: #{$color-ink-2};
+  --ink-3: #{$color-ink-3};
+  --ink-4: #{$color-ink-4};
+
+  // 描边
+  --line: #{$color-line};
+  --line-strong: #{$color-line-strong};
+
+  // 品牌
+  --accent: #{$color-accent};
+  --accent-ink: #{$color-accent-ink};
+  --accent-soft: #{$color-accent-soft};
+
+  // 阴影
+  --shadow-card: #{$shadow-card};
+  --shadow-hover: #{$shadow-hover};
+
+  // 过渡
+  --ease: #{$ease};
+}
+
+// 暗黑主题（监控大屏）
+[data-theme='dark'] {
+  --bg: #{$color-dark-bg};
+  --bg-soft: #{$color-dark-bg-soft};
+  --bg-hover: #{$color-dark-surface};
+  --surface: #{$color-dark-surface};
+  --surface-2: #{$color-dark-bg-soft};
+
+  --ink: #{$color-dark-ink};
+  --ink-2: #{$color-dark-ink-2};
+  --ink-3: #{$color-dark-ink-3};
+  --ink-4: #{$color-dark-line};
+
+  --line: #{$color-dark-line};
+  --line-strong: #2a3441;
+
+  --accent: #{$color-mint};
+  --accent-ink: #{$color-mint};
+  --accent-soft: rgba(126, 211, 164, 0.1);
+
+  --shadow-card: 0 0 0 1px #{$color-dark-line};
+  --shadow-hover: #{$shadow-dark-glow};
+
+  // 暗黑模式滚动条
+  ::-webkit-scrollbar-thumb {
+    background: #2a3441;
+    &:hover { background: #3a4451; }
+  }
+}
+
+// =========================================================================
+// 通用工具类（轻量级原子类，避免引入 Tailwind）
+// =========================================================================
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-center { @include flex-center; }
+.flex-between { @include flex-between; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: $sp-1; }
+.gap-2 { gap: $sp-2; }
+.gap-3 { gap: $sp-3; }
+.gap-4 { gap: $sp-4; }
+
+.grid { display: grid; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-mono { font-family: $font-mono; font-feature-settings: 'tnum' on; }
+.text-serif { font-family: $font-serif; }
+.text-ellipsis { @include text-ellipsis(1); }
+.text-ellipsis-2 { @include text-ellipsis(2); }
+
+.muted { color: var(--ink-2); }
+.muted-2 { color: var(--ink-3); }
+.accent { color: var(--accent); }
+
+.mt-1 { margin-top: $sp-1; } .mt-2 { margin-top: $sp-2; }
+.mt-3 { margin-top: $sp-3; } .mt-4 { margin-top: $sp-4; }
+.mt-6 { margin-top: $sp-6; } .mt-8 { margin-top: $sp-8; }
+.mb-2 { margin-bottom: $sp-2; } .mb-4 { margin-bottom: $sp-4; }
+.mb-6 { margin-bottom: $sp-6; } .mb-8 { margin-bottom: $sp-8; }
+
+// =========================================================================
+// NProgress 进度条自定义（路由切换时显示）
+// =========================================================================
+#nprogress .bar {
+  background: var(--accent) !important;
+  height: 2px;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px var(--accent), 0 0 5px var(--accent);
+}
+
+// =========================================================================
+// 数字翻牌动画（KPI 卡片用）
+// =========================================================================
+.num-flip {
+  display: inline-block;
+  font-family: $font-mono;
+  font-feature-settings: 'tnum' on;
+  transition: color $dur-base $ease;
+
+  &.flash {
+    color: var(--accent-ink);
+  }
+}
