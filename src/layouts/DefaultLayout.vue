@@ -8,16 +8,34 @@
       </div>
 
       <nav class="nav">
-        <RouterLink
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          active-class="is-active"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span v-show="!appStore.sidebarCollapsed" class="nav-label">{{ item.title }}</span>
-        </RouterLink>
+        <template v-for="item in menuItems" :key="item.id || item.path">
+          <!-- 目录（含子菜单） -->
+          <template v-if="item.children?.length">
+            <div
+              v-show="!appStore.sidebarCollapsed"
+              v-if="!appStore.sidebarCollapsed"
+              class="nav-group-title"
+            >
+              <MenuIcon :name="item.icon" :size="14" />
+              <span style="margin-left: 4px">{{ item.name }}</span>
+            </div>
+            <RouterLink
+              v-for="child in item.children"
+              :key="child.id || child.path"
+              :to="child.path!"
+              class="nav-item"
+              active-class="is-active"
+            >
+              <MenuIcon :name="child.icon" :size="18" class="nav-icon" />
+              <span v-show="!appStore.sidebarCollapsed" class="nav-label">{{ child.name }}</span>
+            </RouterLink>
+          </template>
+          <!-- 单个菜单项 -->
+          <RouterLink v-else :to="item.path!" class="nav-item" active-class="is-active">
+            <MenuIcon :name="item.icon" :size="18" class="nav-icon" />
+            <span v-show="!appStore.sidebarCollapsed" class="nav-label">{{ item.name }}</span>
+          </RouterLink>
+        </template>
       </nav>
 
       <div v-show="!appStore.sidebarCollapsed" class="sidebar-footer">
@@ -82,33 +100,78 @@ import { Fold, Expand, Sunny, Moon, Monitor } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { staticRoutes } from '@/router'
+import type { MenuItem } from '@/types/rbac'
 
 const appStore = useAppStore()
 const userStore = useUserStore()
 const route = useRoute()
 
-// 从静态路由提取菜单（过滤掉 hidden 和根节点）
-const menuItems = computed(() => {
+interface NavItem {
+  id: string
+  name: string
+  path?: string
+  icon?: string
+  children?: NavItem[]
+}
+
+// 菜单数据：优先用动态菜单，兜底用静态路由
+const menuItems = computed<NavItem[]>(() => {
+  if (userStore.menus.length > 0) {
+    return userStore.menus
+      .filter((m) => m.type !== 'button' && !m.hidden)
+      .sort((a, b) => a.sort - b.sort)
+      .map(mapMenu)
+  }
+  // 兜底：从静态路由取
   const rootRoute = staticRoutes.find((r) => r.path === '/')
   const children = rootRoute?.children || []
   return children
     .filter((c) => !c.meta?.hidden)
     .map((c) => ({
+      id: String(c.name),
+      name: (c.meta?.title as string) || '',
       path: `/${c.path}`,
-      title: c.meta?.title || '',
-      icon: c.meta?.icon || '📄',
+      icon: (c.meta?.icon as string) || '📄',
     }))
 })
+
+function mapMenu(m: MenuItem): NavItem {
+  return {
+    id: m.id,
+    name: m.name,
+    path: m.path,
+    icon: m.icon,
+    children: m.children?.length
+      ? m.children
+          .filter((c) => c.type !== 'button' && !c.hidden)
+          .sort((a, b) => a.sort - b.sort)
+          .map(mapMenu)
+      : undefined,
+  }
+}
 
 const userName = computed(() => userStore.userInfo?.name || '游客')
 const userRole = computed(() => userStore.userInfo?.role || 'guest')
 const userInitial = computed(() => userName.value.charAt(0).toUpperCase())
 
+// 缓存的页面：从动态菜单 + 静态路由汇总
 const cachedViews = computed(() => {
-  return staticRoutes
+  const names: string[] = []
+  userStore.menus.forEach((m) => {
+    if (m.keepAlive && m.path) {
+      names.push(
+        m.path
+          .replace(/\//g, '-')
+          .replace(/^-/, '')
+          .replace(/^\w/, (c) => c.toUpperCase())
+      )
+    }
+  })
+  staticRoutes
     .flatMap((r) => r.children || [])
     .filter((c) => c.meta?.keepAlive)
-    .map((c) => c.name as string)
+    .forEach((c) => names.push(c.name as string))
+  return names
 })
 </script>
 
@@ -166,8 +229,28 @@ const cachedViews = computed(() => {
   margin-top: $sp-2;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  // 关键：增大间距，防止图标微小溢出导致相邻菜单项重叠
+  gap: 2px;
   flex: 1;
+}
+
+.nav-group-title {
+  margin-top: $sp-4;
+  padding: $sp-1 $sp-3 $sp-1;
+  font-size: $fs-xs;
+  color: $color-ink-3;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: $fw-medium;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .nav-item {
@@ -175,6 +258,9 @@ const cachedViews = computed(() => {
   align-items: center;
   gap: $sp-2;
   padding: $sp-2 $sp-3;
+  // 关键：固定行高，防止图标 SVG 撑高导致相邻菜单项重叠
+  min-height: 36px;
+  box-sizing: border-box;
   border-radius: $radius-sm;
   color: $color-ink;
   font-size: $fs-md;
@@ -191,10 +277,33 @@ const cachedViews = computed(() => {
   }
 }
 
+// nav-icon 是 el-icon 容器，必须固定尺寸 + overflow hidden 防止 SVG 溢出
 .nav-icon {
-  font-size: $fs-md;
-  width: 18px;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  overflow: hidden; // 关键：裁剪溢出的 SVG 部分，绝不让它侵入相邻行
+  color: $color-ink-2;
+  transition: color $dur-fast $ease;
+
+  // 强制内部 SVG 不超过容器尺寸
+  :deep(svg) {
+    width: 1em;
+    height: 1em;
+    max-width: 18px;
+    max-height: 18px;
+  }
+}
+
+.nav-item:hover .nav-icon {
+  color: $color-ink;
+}
+
+.nav-item.is-active .nav-icon {
+  color: $color-accent-ink;
 }
 
 .sidebar-footer {

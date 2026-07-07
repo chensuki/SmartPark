@@ -2,6 +2,9 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+// 虚拟列表（大屏告警流用）
+import VueVirtualScroller from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 import App from './App.vue'
 import router from './router'
@@ -21,6 +24,9 @@ app.use(pinia)
 
 // Router
 app.use(router)
+
+// 虚拟列表
+app.use(VueVirtualScroller)
 
 // Element Plus 图标全量注册（按需可优化）
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

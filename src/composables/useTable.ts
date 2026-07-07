@@ -6,25 +6,27 @@ import type { PageQuery, PaginatedData } from '@/types/global'
  *
  * @example
  * const { data, loading, query, refresh, handlePageChange } = useTable(fetchUserList)
+ * // 自定义查询参数类型
+ * useTable<User, UserQuery>(getUserList)
  */
-export function useTable<T>(
-  fetcher: (params: PageQuery) => Promise<PaginatedData<T>>,
-  defaultQuery: Partial<PageQuery> = {}
+export function useTable<T, Q extends PageQuery = PageQuery>(
+  fetcher: (params: Q) => Promise<PaginatedData<T>>,
+  defaultQuery: Partial<Q> = {}
 ) {
   const loading = ref(false)
   const data = ref<T[]>([]) as ReturnType<typeof ref<T[]>>
   const total = ref(0)
 
-  const query = reactive<PageQuery>({
+  const query = reactive({
     page: 1,
     pageSize: 10,
     ...defaultQuery,
-  })
+  }) as unknown as Q
 
   async function refresh() {
     loading.value = true
     try {
-      const res = await fetcher({ ...query })
+      const res = await fetcher({ ...query } as Q)
       data.value = res.list
       total.value = res.total
     } catch (e) {

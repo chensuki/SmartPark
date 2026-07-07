@@ -1,6 +1,13 @@
 import { onBeforeUnmount, onMounted, shallowRef, type Ref } from 'vue'
 import * as echarts from 'echarts/core'
-import { BarChart, LineChart, PieChart, ScatterChart, MapChart } from 'echarts/charts'
+import {
+  BarChart,
+  LineChart,
+  PieChart,
+  ScatterChart,
+  MapChart,
+  EffectScatterChart,
+} from 'echarts/charts'
 import {
   GridComponent,
   TooltipComponent,
@@ -9,17 +16,19 @@ import {
   GeoComponent,
   DataZoomComponent,
   GraphicComponent,
+  VisualMapComponent,
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { EChartsOption } from 'echarts'
 
-// 按需注册（减少打包体积，约从 1MB 降到 300KB）
+// 按需注册（EffectScatter 用于飞线动效，VisualMap 用于热力图例）
 echarts.use([
   BarChart,
   LineChart,
   PieChart,
   ScatterChart,
   MapChart,
+  EffectScatterChart,
   GridComponent,
   TooltipComponent,
   LegendComponent,
@@ -27,6 +36,7 @@ echarts.use([
   GeoComponent,
   DataZoomComponent,
   GraphicComponent,
+  VisualMapComponent,
   CanvasRenderer,
 ])
 
@@ -42,6 +52,28 @@ const DARK_THEME = {
   color: ['#7ed3a4', '#3b6cff', '#f5a524', '#e0445a', '#9b59b6', '#1abc9c'],
   backgroundColor: 'transparent',
   textStyle: { fontFamily: 'JetBrains Mono, monospace', color: '#e6edf3' },
+}
+
+/** 已注册的地图名称缓存（避免重复注册） */
+const registeredMaps = new Set<string>()
+
+/**
+ * 注册中国地图（从 DataV 公开 geoJSON 加载，失败时返回 false 走兜底）
+ * 数据源：https://datav.aliyun.com/portal/school/atlas/area_selector
+ */
+export async function registerChinaMap(): Promise<boolean> {
+  if (registeredMaps.has('china')) return true
+  try {
+    const res = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+    if (!res.ok) throw new Error('地图加载失败')
+    const geo = await res.json()
+    echarts.registerMap('china', geo)
+    registeredMaps.add('china')
+    return true
+  } catch (e) {
+    console.warn('[echarts] 中国地图加载失败，散点将基于空白地图渲染', e)
+    return false
+  }
 }
 
 /**

@@ -90,17 +90,23 @@
     <!-- 三栏洞察 -->
     <section class="insights">
       <div class="insight-card">
-        <div class="emoji">📉</div>
+        <div class="insight-icon green">
+          <el-icon><TrendCharts /></el-icon>
+        </div>
         <h3>单位能耗 -23%</h3>
         <p class="muted">AI 调度让楼宇空调、照明智能协同，年节省电费 240 万。</p>
       </div>
       <div class="insight-card">
-        <div class="emoji">🏢</div>
+        <div class="insight-icon blue">
+          <el-icon><OfficeBuilding /></el-icon>
+        </div>
         <h3>入驻率 +18%</h3>
         <p class="muted">数字化招商流程 + 数据看板，新企业入驻周期从 14 天降到 5 天。</p>
       </div>
       <div class="insight-card">
-        <div class="emoji">🔧</div>
+        <div class="insight-icon orange">
+          <el-icon><Tools /></el-icon>
+        </div>
         <h3>故障响应 -65%</h3>
         <p class="muted">设备预测性维护，平均故障响应时间从 4.2h 降到 1.5h。</p>
       </div>
@@ -201,9 +207,27 @@
   border-radius: $radius-lg;
   padding: $sp-5;
 
-  .emoji {
-    font-size: $fs-4xl;
-    margin-bottom: $sp-2;
+  .insight-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-md;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    margin-bottom: $sp-3;
+
+    &.green {
+      background: rgba(43, 138, 62, 0.1);
+      color: #2b8a3e;
+    }
+    &.blue {
+      background: rgba(31, 110, 140, 0.1);
+      color: #1f6e8c;
+    }
+    &.orange {
+      background: rgba(201, 100, 66, 0.1);
+      color: $color-accent;
+    }
   }
 
   h3 {

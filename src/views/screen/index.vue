@@ -54,23 +54,29 @@
       <!-- 告警流（终端日志美学） -->
       <section class="panel log-panel">
         <div class="panel-title">
-          <span>// 实时告警流</span>
-          <span class="muted mono">{{ logs.length }} events</span>
+          <span>// 实时告警流（虚拟滚动 · {{ logs.length }} 条）</span>
+          <span class="muted mono">{{ activeLogs }} active</span>
         </div>
-        <div class="log-stream">
-          <div v-for="log in logs" :key="log.id" class="log-line mono" :class="log.level">
-            <span class="log-time">[{{ log.time }}]</span>
-            <span class="log-level">{{ log.level.toUpperCase() }}</span>
-            <span class="log-msg">{{ log.msg }}</span>
+        <RecycleScroller
+          v-slot="{ item }"
+          class="log-stream"
+          :items="logs"
+          :item-size="28"
+          key-field="id"
+        >
+          <div class="log-line mono" :class="item.level">
+            <span class="log-time">[{{ item.time }}]</span>
+            <span class="log-level">{{ item.level.toUpperCase() }}</span>
+            <span class="log-msg">{{ item.msg }}</span>
           </div>
-        </div>
+        </RecycleScroller>
       </section>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useECharts } from '@/composables/useECharts'
 import { useAppStore } from '@/stores/app'
 
@@ -124,6 +130,9 @@ interface LogLine {
 }
 const logs = ref<LogLine[]>([])
 let logId = 0
+
+// 未处理的活跃告警数（演示虚拟列表上方的统计）
+const activeLogs = computed(() => logs.value.filter((l) => l.level !== 'info').length)
 
 function pushLog() {
   const t = LOG_TEMPLATES[Math.floor(Math.random() * LOG_TEMPLATES.length)]
@@ -192,8 +201,8 @@ onMounted(() => {
   appStore.setTheme('dark')
   updateClock()
   renderEnergy()
-  // 初始填充 6 条日志
-  for (let i = 0; i < 6; i++) pushLog()
+  // 初始填充 500 条历史日志（演示虚拟列表渲染万级数据的流畅度）
+  for (let i = 0; i < 500; i++) pushLog()
   timer = setInterval(() => {
     updateClock()
     pushLog()
@@ -463,6 +472,7 @@ onBeforeUnmount(() => {
 
 .log-stream {
   flex: 1;
+  height: 220px;
   overflow-y: auto;
   font-size: $fs-sm;
   line-height: 1.7;
