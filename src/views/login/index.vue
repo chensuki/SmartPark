@@ -33,19 +33,12 @@
             show-password
           />
         </el-form-item>
-        <el-button
-          type="primary"
-          class="login-btn"
-          :loading="loading"
-          @click="handleLogin"
-        >
+        <el-button type="primary" class="login-btn" :loading="loading" @click="handleLogin">
           登 录
         </el-button>
       </el-form>
 
-      <p class="hint muted-2">
-        Demo 环境：任意账号密码即可登录，数据由 Mock 生成
-      </p>
+      <p class="hint muted-2">Demo 环境：任意账号密码即可登录，数据由 Mock 生成</p>
     </div>
 
     <footer class="login-foot muted-2">
@@ -88,7 +81,8 @@ async function handleLogin() {
       ElMessage.success('登录成功')
       const redirect = (route.query.redirect as string) || '/'
       router.push(redirect)
-    } catch (e) {
+    } catch (err) {
+      console.error('[login] failed:', err)
       ElMessage.error('登录失败，请重试')
     } finally {
       loading.value = false

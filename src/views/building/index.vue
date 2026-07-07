@@ -5,7 +5,7 @@
         <h1 class="title">楼宇资产</h1>
         <p class="sub muted">园区内所有楼宇的资产管理与入驻情况</p>
       </div>
-      <el-button type="primary" v-permission="'building:add'">
+      <el-button v-permission="'building:add'" type="primary">
         <el-icon><Plus /></el-icon>
         <span style="margin-left: 6px">新增楼宇</span>
       </el-button>
@@ -15,7 +15,12 @@
     <div class="card search-card">
       <el-form :model="table.query" inline>
         <el-form-item label="楼宇名称">
-          <el-input v-model="table.query.keyword" placeholder="搜索楼宇名称/编码" clearable style="width: 220px" />
+          <el-input
+            v-model="table.query.keyword"
+            placeholder="搜索楼宇名称/编码"
+            clearable
+            style="width: 220px"
+          />
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="statusFilter" placeholder="全部" clearable style="width: 140px">
@@ -26,7 +31,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="table.handleSearch()">
-            <el-icon><Search /></el-icon><span style="margin-left:6px">查询</span>
+            <el-icon><Search /></el-icon><span style="margin-left: 6px">查询</span>
           </el-button>
           <el-button @click="table.handleReset()">重置</el-button>
         </el-form-item>
@@ -35,7 +40,7 @@
 
     <!-- 表格 -->
     <div class="card">
-      <el-table :data="table.data.value" v-loading="table.loading.value" style="width: 100%">
+      <el-table v-loading="table.loading.value" :data="table.data.value" style="width: 100%">
         <el-table-column type="index" label="#" width="60" />
         <el-table-column prop="code" label="编码" width="120" />
         <el-table-column prop="name" label="楼宇名称" min-width="160" />
@@ -130,9 +135,7 @@ async function fetchBuildings(query: BuildingQuery): Promise<PaginatedData<Build
   // 模拟搜索
   let filtered = all
   if (query.keyword) {
-    filtered = all.filter(
-      (b) => b.name.includes(query.keyword!) || b.code.includes(query.keyword!),
-    )
+    filtered = all.filter((b) => b.name.includes(query.keyword!) || b.code.includes(query.keyword!))
   }
   if (query.status) {
     filtered = filtered.filter((b) => b.status === query.status)
@@ -147,12 +150,22 @@ async function fetchBuildings(query: BuildingQuery): Promise<PaginatedData<Build
   }
 }
 
-const table = useTable<Building>(fetchBuildings as (params: PageQuery) => Promise<PaginatedData<Building>>)
+const table = useTable<Building>(
+  fetchBuildings as (params: PageQuery) => Promise<PaginatedData<Building>>
+)
 
 // 同步筛选状态到 query（empty string 视为不筛选）
 watch(statusFilter, (v) => {
   table.query.status = v || undefined
 })
+
+// 重置查询时反向同步 statusFilter（避免 UI 与 query 状态不一致）
+watch(
+  () => table.query.status,
+  (v) => {
+    if (statusFilter.value !== (v ?? '')) statusFilter.value = (v as string) ?? ''
+  }
+)
 
 table.refresh()
 </script>

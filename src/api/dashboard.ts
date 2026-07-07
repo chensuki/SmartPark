@@ -2,13 +2,12 @@ import request from './request'
 import type { KpiItem, Alarm } from '@/types/global'
 
 /** 首页 KPI 数据 */
-export const getDashboardKpis = () =>
-  request.get<KpiItem[]>('/dashboard/kpis')
+export const getDashboardKpis = () => request.get<KpiItem[]>('/dashboard/kpis')
 
 /** 实时活动流 */
 export const getDashboardActivities = () =>
   request.get<Array<{ id: string; who: string; action: string; target: string; time: string }>>(
-    '/dashboard/activities',
+    '/dashboard/activities'
   )
 
 /** 实时告警列表 */
@@ -23,5 +22,5 @@ export const getEnergyTrend = (days = 7) =>
 /** 园区分布（地图散点） */
 export const getParkDistribution = () =>
   request.get<Array<{ name: string; value: number; coord: [number, number] }>>(
-    '/dashboard/distribution',
+    '/dashboard/distribution'
   )

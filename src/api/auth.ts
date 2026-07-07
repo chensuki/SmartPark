@@ -12,8 +12,7 @@ export interface LoginResult {
 }
 
 /** 登录 */
-export const login = (data: LoginParams) =>
-  request.post<LoginResult>('/auth/login', data)
+export const login = (data: LoginParams) => request.post<LoginResult>('/auth/login', data)
 
 /** 退出登录 */
 export const logout = () => request.post<void>('/auth/logout')

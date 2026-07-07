@@ -69,7 +69,7 @@ const devices = ref<Device[]>(
       status: statuses[i % 6],
       lastHeartbeat: d.toLocaleString('zh-CN'),
     }
-  }),
+  })
 )
 </script>
 
@@ -106,9 +106,15 @@ const devices = ref<Device[]>(
   padding: $sp-5;
   border-left: 3px solid;
 
-  &.online { border-left-color: #2b8a3e; }
-  &.warning { border-left-color: $color-amber; }
-  &.offline { border-left-color: $color-ink-3; }
+  &.online {
+    border-left-color: #2b8a3e;
+  }
+  &.warning {
+    border-left-color: $color-amber;
+  }
+  &.offline {
+    border-left-color: $color-ink-3;
+  }
 }
 
 .stat-num {

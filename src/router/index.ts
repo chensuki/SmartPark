@@ -72,9 +72,7 @@ const WHITE_LIST = ['/login']
 
 router.beforeEach((to, _from, next) => {
   NProgress.start()
-  document.title = to.meta.title
-    ? `${to.meta.title} · SmartPark`
-    : 'SmartPark · 智慧园区运营平台'
+  document.title = to.meta.title ? `${to.meta.title} · SmartPark` : 'SmartPark · 智慧园区运营平台'
 
   const userStore = useUserStore()
   const hasToken = userStore.isLogin()

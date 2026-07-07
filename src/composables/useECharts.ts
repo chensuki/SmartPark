@@ -54,10 +54,7 @@ const DARK_THEME = {
  *
  * <template><div ref="chartRef" style="height: 240px"></div></template>
  */
-export function useECharts(
-  chartRef: Ref<HTMLElement | null>,
-  theme: 'light' | 'dark' = 'light',
-) {
+export function useECharts(chartRef: Ref<HTMLElement | null>, theme: 'light' | 'dark' = 'light') {
   // 用 shallowRef 避免对 echarts 实例做深度响应式（性能）
   const instance = shallowRef<echarts.ECharts | null>(null)
 

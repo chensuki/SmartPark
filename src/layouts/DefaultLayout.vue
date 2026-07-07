@@ -20,7 +20,7 @@
         </RouterLink>
       </nav>
 
-      <div class="sidebar-footer" v-show="!appStore.sidebarCollapsed">
+      <div v-show="!appStore.sidebarCollapsed" class="sidebar-footer">
         <div class="ws">
           <div class="ws-avatar">{{ userInitial }}</div>
           <div class="ws-info">
@@ -36,7 +36,7 @@
       <!-- 顶栏 -->
       <header class="topbar">
         <div class="topbar-left">
-          <button class="icon-btn" @click="appStore.toggleSidebar()" aria-label="切换侧栏">
+          <button class="icon-btn" aria-label="切换侧栏" @click="appStore.toggleSidebar()">
             <el-icon><Fold v-if="!appStore.sidebarCollapsed" /><Expand v-else /></el-icon>
           </button>
           <el-breadcrumb separator="/">
@@ -51,7 +51,7 @@
             <span>实时</span>
           </div>
           <!-- 主题切换 -->
-          <button class="icon-btn" @click="appStore.toggleTheme()" aria-label="切换主题">
+          <button class="icon-btn" aria-label="切换主题" @click="appStore.toggleTheme()">
             <el-icon><Sunny v-if="appStore.theme === 'dark'" /><Moon v-else /></el-icon>
           </button>
           <!-- 大屏入口 -->
@@ -275,7 +275,9 @@ const cachedViews = computed(() => {
   height: 32px;
   border-radius: $radius-sm;
   color: $color-ink-2;
-  transition: background $dur-fast $ease, color $dur-fast $ease;
+  transition:
+    background $dur-fast $ease,
+    color $dur-fast $ease;
 
   &:hover {
     background: $color-bg-hover;
@@ -332,7 +334,9 @@ const cachedViews = computed(() => {
 // 路由切换过渡
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity $dur-base $ease, transform $dur-base $ease;
+  transition:
+    opacity $dur-base $ease,
+    transform $dur-base $ease;
 }
 
 .fade-enter-from {

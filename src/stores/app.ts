@@ -45,5 +45,5 @@ export const useAppStore = defineStore(
       key: 'sp_app',
       pick: ['theme', 'sidebarCollapsed'],
     },
-  },
+  }
 )

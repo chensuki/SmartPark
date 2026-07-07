@@ -20,7 +20,9 @@
       <section class="kpi-row">
         <div v-for="(kpi, i) in kpis" :key="i" class="kpi-block">
           <div class="kpi-label">{{ kpi.label }}</div>
-          <div class="kpi-value mono">{{ kpi.value }}<span class="unit">{{ kpi.unit }}</span></div>
+          <div class="kpi-value mono">
+            {{ kpi.value }}<span class="unit">{{ kpi.unit }}</span>
+          </div>
           <div class="kpi-trend" :class="kpi.trend">{{ kpi.delta }}</div>
         </div>
       </section>
@@ -56,12 +58,7 @@
           <span class="muted mono">{{ logs.length }} events</span>
         </div>
         <div class="log-stream">
-          <div
-            v-for="log in logs"
-            :key="log.id"
-            class="log-line mono"
-            :class="log.level"
-          >
+          <div v-for="log in logs" :key="log.id" class="log-line mono" :class="log.level">
             <span class="log-time">[{{ log.time }}]</span>
             <span class="log-level">{{ log.level.toUpperCase() }}</span>
             <span class="log-msg">{{ log.msg }}</span>
@@ -75,6 +72,11 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useECharts } from '@/composables/useECharts'
+import { useAppStore } from '@/stores/app'
+
+const appStore = useAppStore()
+// 记录进入大屏前的主题，离开时恢复（避免污染全局主题状态）
+let previousTheme: 'light' | 'dark' = 'light'
 
 const clock = ref('')
 const energyRef = ref<HTMLElement | null>(null)
@@ -169,7 +171,10 @@ function renderEnergy() {
         areaStyle: {
           color: {
             type: 'linear',
-            x: 0, y: 0, x2: 0, y2: 1,
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
             colorStops: [
               { offset: 0, color: 'rgba(126,211,164,0.3)' },
               { offset: 1, color: 'rgba(126,211,164,0)' },
@@ -182,8 +187,9 @@ function renderEnergy() {
 }
 
 onMounted(() => {
-  // 强制暗黑主题（覆盖全局）
-  document.documentElement.setAttribute('data-theme', 'dark')
+  // 记录原主题，强制切到暗黑（大屏专用）
+  previousTheme = appStore.theme
+  appStore.setTheme('dark')
   updateClock()
   renderEnergy()
   // 初始填充 6 条日志
@@ -196,8 +202,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (timer) clearInterval(timer)
-  // 恢复默认主题
-  document.documentElement.removeAttribute('data-theme')
+  // 恢复进入前的主题（避免污染全局主题状态）
+  appStore.setTheme(previousTheme)
 })
 </script>
 
@@ -255,9 +261,15 @@ onBeforeUnmount(() => {
   border-radius: $radius-full;
   display: inline-block;
 
-  &.red { background: #ff5f57; }
-  &.amber { background: #febc2e; }
-  &.green { background: #28c840; }
+  &.red {
+    background: #ff5f57;
+  }
+  &.amber {
+    background: #febc2e;
+  }
+  &.green {
+    background: #28c840;
+  }
 }
 
 .prompt {
@@ -297,8 +309,13 @@ onBeforeUnmount(() => {
 }
 
 @keyframes pulse-dark {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 // ============ 主区 ============
@@ -350,8 +367,12 @@ onBeforeUnmount(() => {
   font-size: $fs-xs;
   color: $color-dark-ink-2;
 
-  &.up { color: $color-mint; }
-  &.down { color: $color-danger; }
+  &.up {
+    color: $color-mint;
+  }
+  &.down {
+    color: $color-danger;
+  }
 }
 
 // ============ 中部行 ============
@@ -389,8 +410,7 @@ onBeforeUnmount(() => {
   flex: 1;
   position: relative;
   min-height: 240px;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(59, 108, 255, 0.05), transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(59, 108, 255, 0.05), transparent 70%);
 }
 
 .site {
@@ -412,9 +432,15 @@ onBeforeUnmount(() => {
 }
 
 @keyframes site-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(126, 211, 164, 0.7); }
-  70% { box-shadow: 0 0 0 14px rgba(126, 211, 164, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(126, 211, 164, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(126, 211, 164, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(126, 211, 164, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(126, 211, 164, 0);
+  }
 }
 
 .site-label {
@@ -448,9 +474,15 @@ onBeforeUnmount(() => {
   padding: 2px 0;
   animation: log-in 0.3s $ease backwards;
 
-  &.info { color: $color-dark-ink-2; }
-  &.warning { color: $color-amber; }
-  &.danger { color: $color-danger; }
+  &.info {
+    color: $color-dark-ink-2;
+  }
+  &.warning {
+    color: $color-amber;
+  }
+  &.danger {
+    color: $color-danger;
+  }
 }
 
 @keyframes log-in {

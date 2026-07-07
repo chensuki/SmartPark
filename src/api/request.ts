@@ -66,7 +66,7 @@ service.interceptors.request.use(
   (error) => {
     hideLoading()
     return Promise.reject(error)
-  },
+  }
 )
 
 // =========================================================================
@@ -121,7 +121,7 @@ service.interceptors.response.use(
 
     if (!opts.silent) ElMessage.error(msg)
     return Promise.reject(error)
-  },
+  }
 )
 
 /** 401 统一处理：清 token + 弹窗 + 跳登录（防止多次弹窗） */

@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { onScopeDispose, ref, watch, type Ref } from 'vue'
 
 /**
  * 数字 tween 动画
@@ -21,10 +21,7 @@ export interface TweenOptions {
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
-export function useTween(
-  source: Ref<number>,
-  options: TweenOptions = {},
-): Ref<number> {
+export function useTween(source: Ref<number>, options: TweenOptions = {}): Ref<number> {
   const { duration = 600, easing = easeOutCubic, disabled = false, decimals = 0 } = options
 
   const display = ref(source.value)
@@ -60,8 +57,13 @@ export function useTween(
       }
       rafId = requestAnimationFrame(step)
     },
-    { immediate: false },
+    { immediate: false }
   )
+
+  // 组件卸载时取消未完成的 rAF，避免更新已销毁的 ref（内存泄漏/报错）
+  onScopeDispose(() => {
+    if (rafId) cancelAnimationFrame(rafId)
+  })
 
   return display
 }

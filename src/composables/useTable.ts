@@ -9,7 +9,7 @@ import type { PageQuery, PaginatedData } from '@/types/global'
  */
 export function useTable<T>(
   fetcher: (params: PageQuery) => Promise<PaginatedData<T>>,
-  defaultQuery: Partial<PageQuery> = {},
+  defaultQuery: Partial<PageQuery> = {}
 ) {
   const loading = ref(false)
   const data = ref<T[]>([]) as ReturnType<typeof ref<T[]>>

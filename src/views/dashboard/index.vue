@@ -7,7 +7,7 @@
         <p class="page-sub">{{ greeting }}，{{ userName }} — 今日园区运行平稳</p>
       </div>
       <div class="page-actions">
-        <el-button @click="handleRefresh" :loading="loading">
+        <el-button :loading="loading" @click="handleRefresh">
           <el-icon><Refresh /></el-icon>
           <span style="margin-left: 6px">刷新</span>
         </el-button>
@@ -34,13 +34,20 @@
           <span v-if="kpi.unit" class="kpi-unit">{{ kpi.unit }}</span>
         </div>
         <div class="kpi-delta" :class="kpi.trend">
-          <span class="arrow">{{ kpi.trend === 'up' ? '↑' : kpi.trend === 'down' ? '↓' : '·' }}</span>
+          <span class="arrow">{{
+            kpi.trend === 'up' ? '↑' : kpi.trend === 'down' ? '↓' : '·'
+          }}</span>
           <span>{{ kpi.deltaText }}</span>
         </div>
         <!-- sparkline -->
         <svg v-if="kpi.series" class="spark" :viewBox="`0 0 100 24`" preserveAspectRatio="none">
           <path :d="sparkPath(kpi.series)" :fill="sparkFill(kpi)" />
-          <path :d="sparkPath(kpi.series)" fill="none" :stroke="sparkColor(kpi)" stroke-width="1.5" />
+          <path
+            :d="sparkPath(kpi.series)"
+            fill="none"
+            :stroke="sparkColor(kpi)"
+            stroke-width="1.5"
+          />
         </svg>
       </div>
     </section>
@@ -91,7 +98,9 @@
         <el-table-column prop="level" label="级别" width="100">
           <template #default="{ row }">
             <el-tag
-              :type="row.level === 'danger' ? 'danger' : row.level === 'warning' ? 'warning' : 'info'"
+              :type="
+                row.level === 'danger' ? 'danger' : row.level === 'warning' ? 'warning' : 'info'
+              "
               size="small"
               effect="light"
             >
@@ -143,20 +152,63 @@ interface DisplayKpi extends KpiItem {
   deltaText: string
 }
 
-const kpiList = ref<DisplayKpi[]>([
-  { label: '入驻企业', value: 0, display: 0, unit: '家', delta: 12, trend: 'up', deltaText: '本月 +12', series: [8, 9, 11, 10, 12, 14, 15] },
-  { label: '设备总数', value: 0, display: 0, unit: '台', delta: 24, trend: 'up', deltaText: '本月 +24', series: [120, 135, 140, 150, 160, 175, 180] },
-  { label: '在线率', value: 0, display: 0, unit: '%', delta: 2, trend: 'up', deltaText: '环比 +2%', series: [95, 96, 94, 97, 98, 99, 99] },
-  { label: '告警数', value: 0, display: 0, unit: '条', delta: -3, trend: 'down', deltaText: '环比 -3', series: [12, 9, 11, 8, 7, 5, 4] },
-])
+// 本地降级数据（接口失败时使用，避免页面显示全 0）
+const FALLBACK_KPIS: DisplayKpi[] = [
+  {
+    label: '入驻企业',
+    value: 238,
+    display: 0,
+    unit: '家',
+    delta: 12,
+    trend: 'up',
+    deltaText: '本月 +12',
+    series: [220, 224, 230, 232, 235, 236, 238],
+  },
+  {
+    label: '设备总数',
+    value: 1820,
+    display: 0,
+    unit: '台',
+    delta: 24,
+    trend: 'up',
+    deltaText: '本月 +24',
+    series: [1700, 1740, 1760, 1780, 1800, 1812, 1820],
+  },
+  {
+    label: '在线率',
+    value: 99,
+    display: 0,
+    unit: '%',
+    delta: 2,
+    trend: 'up',
+    deltaText: '环比 +2%',
+    series: [95, 96, 94, 97, 98, 99, 99],
+  },
+  {
+    label: '告警数',
+    value: 4,
+    display: 0,
+    unit: '条',
+    delta: -3,
+    trend: 'down',
+    deltaText: '环比 -3',
+    series: [12, 9, 11, 8, 7, 5, 4],
+  },
+]
+
+const kpiList = ref<DisplayKpi[]>(FALLBACK_KPIS.map((k) => ({ ...k, value: 0, display: 0 })))
+
+// 能耗趋势本地数据（与图表保持一致，避免 energySum 语义错位）
+const ENERGY_SERIES = [320, 380, 410, 360, 420, 280, 240]
 
 async function loadKpis() {
   loading.value = true
   try {
     const data = await getDashboardKpis()
+    const source = data?.length ? data : FALLBACK_KPIS
     kpiList.value = kpiList.value.map((k, i) => ({
       ...k,
-      ...data[i],
+      ...source[i],
       display: k.display,
     }))
     // tween 动画
@@ -167,7 +219,10 @@ async function loadKpis() {
       tweenNumber(i, from, target, 800)
     })
   } catch (e) {
-    console.warn('[dashboard] KPI fallback to defaults', e)
+    // 接口失败：用降级数据填充（仍触发 tween 动画，体验不中断）
+    console.warn('[dashboard] KPI 接口失败，使用本地降级数据', e)
+    kpiList.value = FALLBACK_KPIS.map((k) => ({ ...k, display: 0 }))
+    kpiList.value.forEach((k, i) => tweenNumber(i, 0, Number(k.value), 800))
   } finally {
     loading.value = false
   }
@@ -214,13 +269,11 @@ function sparkFill(kpi: DisplayKpi): string {
 const energyChartRef = ref<HTMLElement | null>(null)
 const energy = useECharts(energyChartRef, 'light')
 
-const energySum = computed(() =>
-  kpiList.value[0]?.series?.reduce((a, b) => a + b, 0) ?? 0,
-)
+const energySum = computed(() => ENERGY_SERIES.reduce((a, b) => a + b, 0))
 
 function renderEnergyChart() {
   const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-  const data = [320, 380, 410, 360, 420, 280, 240]
+  const data = ENERGY_SERIES
   energy.setOption({
     grid: { top: 20, right: 20, bottom: 30, left: 50 },
     tooltip: { trigger: 'axis' },
@@ -247,7 +300,10 @@ function renderEnergyChart() {
         areaStyle: {
           color: {
             type: 'linear',
-            x: 0, y: 0, x2: 0, y2: 1,
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
             colorStops: [
               { offset: 0, color: 'rgba(201,100,66,0.25)' },
               { offset: 1, color: 'rgba(201,100,66,0)' },
@@ -275,10 +331,16 @@ const activities = ref<ActivityItem[]>([])
 async function loadActivities() {
   try {
     const data = await getDashboardActivities()
+    const palette = ['#f1c40f', '#3498db', '#e67e22', '#9b59b6', '#1abc9c']
     activities.value = data.map((d, i) => ({
       ...d,
-      color: ['#f1c40f', '#3498db', '#e67e22', '#9b59b6', '#1abc9c'][i % 5],
+      color: palette[i % palette.length],
+      // 第一条（最新）高亮 1.5s 后取消，体现"实时"感
+      _isNew: i === 0,
     }))
+    setTimeout(() => {
+      if (activities.value[0]) activities.value[0]._isNew = false
+    }, 1500)
   } catch (e) {
     console.warn('[dashboard] activities fallback', e)
   }
@@ -356,7 +418,9 @@ onMounted(async () => {
   @include card-base;
   padding: $sp-5;
   animation: kpi-in 0.5s $ease backwards;
-  transition: box-shadow $dur-base $ease, transform $dur-base $ease;
+  transition:
+    box-shadow $dur-base $ease,
+    transform $dur-base $ease;
 
   &:hover {
     box-shadow: $shadow-hover;

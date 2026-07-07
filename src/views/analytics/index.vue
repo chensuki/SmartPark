@@ -9,8 +9,8 @@
     <article class="narrative">
       <div class="kicker accent">SMARTPARK · ANNUAL REPORT · 2025-2026</div>
       <h2 class="headline text-serif">
-        园区能耗在 <span class="hl">2024 之后</span> 进入下降通道 ——
-        AI 优化策略让单位面积能耗下降 23%。
+        园区能耗在 <span class="hl">2024 之后</span> 进入下降通道 —— AI 优化策略让单位面积能耗下降
+        23%。
       </h2>
 
       <!-- 手绘 SVG 折线（NYT 风） -->
@@ -30,18 +30,24 @@
         <!-- 区域填充 -->
         <path
           d="M 60 250 L 180 240 L 300 245 L 420 220 L 540 210 L 660 180 L 780 150 L 900 110 L 1020 80 L 1020 290 L 60 290 Z"
-          fill="#c96442" opacity="0.06"
+          fill="#c96442"
+          opacity="0.06"
         />
         <!-- 主线 -->
         <polyline
           class="draw-line"
-          fill="none" stroke="#c96442" stroke-width="2.5"
-          stroke-linejoin="round" stroke-linecap="round"
+          fill="none"
+          stroke="#c96442"
+          stroke-width="2.5"
+          stroke-linejoin="round"
+          stroke-linecap="round"
           points="60,250 180,240 300,245 420,220 540,210 660,180 780,150 900,110 1020,80"
         />
         <!-- 拐点高亮 -->
         <polyline
-          fill="none" stroke="#a91d1d" stroke-width="2.5"
+          fill="none"
+          stroke="#a91d1d"
+          stroke-width="2.5"
           stroke-dasharray="6 5"
           points="660,180 780,150 900,110 1020,80"
         />
@@ -78,9 +84,7 @@
         </g>
       </svg>
 
-      <p class="source muted-2 mono">
-        Source · SmartPark 内部 BI · 2026-05
-      </p>
+      <p class="source muted-2 mono">Source · SmartPark 内部 BI · 2026-05</p>
     </article>
 
     <!-- 三栏洞察 -->
@@ -166,7 +170,9 @@
 }
 
 @keyframes draw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .axis-label {
