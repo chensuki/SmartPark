@@ -15,6 +15,14 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import 'virtual:svg-icons-register'
 import '@/styles/index.scss'
 
+// 生产环境 Mock（Vercel 部署时无后端，用 mockProdServer 拦截 /api 请求）
+// 必须在 app.mount 之前调用，确保 axios 发请求时拦截器已就绪
+if (import.meta.env.PROD) {
+  import('../mockProdServer').then(({ setupProdMockServer }) => {
+    setupProdMockServer()
+  })
+}
+
 const app = createApp(App)
 
 // Pinia（带持久化）
